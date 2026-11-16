@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
 import { dateLong, dateShort, dayNum, timeOf, eur } from "@/lib/format";
 import { LAYER_LABEL, type EventRow } from "@/lib/data";
@@ -9,7 +10,7 @@ const PALETTE = ["#1a03b5", "#e42158", "#f8450a", "#10066e", "#0b8a9a", "#5a2bd6
 function hash(s: string) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); }
 
 /** Cartel generado del evento (sustituye a la imagen hasta que los boards suban sus propios carteles). */
-export function Poster({ e, accent, chapterName, badge, className = "" }: { e: EventRow; accent?: string | null; chapterName?: string; badge?: string; className?: string }) {
+function PosterArt({ e, accent, chapterName, badge, className = "" }: { e: EventRow; accent?: string | null; chapterName?: string; badge?: string; className?: string }) {
   if (e.flyer_url) {
     return (
       <div className={`relative aspect-[3/4] overflow-hidden rounded-2xl bg-mist ${className}`}>
@@ -50,6 +51,11 @@ export function Poster({ e, accent, chapterName, badge, className = "" }: { e: E
       </div>
     </div>
   );
+}
+
+/** Cartel del evento. Lleva un nombre de transición para que "vuele" entre la lista y la ficha. */
+export function Poster(props: { e: EventRow; accent?: string | null; chapterName?: string; badge?: string; className?: string }) {
+  return <ViewTransition name={`poster-${props.e.id}`} share="poster-morph"><PosterArt {...props} /></ViewTransition>;
 }
 
 /** Tarjeta pequeña para la fila horizontal de la home. */

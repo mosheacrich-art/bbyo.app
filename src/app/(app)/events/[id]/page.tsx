@@ -75,7 +75,8 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ev
                 {r && <span className="tag">{STATUS_LABEL[r.status]}</span>}
               </div>
               {!r && open && (
-                <ActionForm action={registerAction} hidden={{ event: e.id, person: p.id }} submit={full ? "Apuntarme a la lista de espera" : "Inscribir"}>
+                <ActionForm action={registerAction} hidden={{ event: e.id, person: p.id }} submit={full ? "Apuntarme a la lista de espera" : "Inscribir"}
+                  celebrate={full ? "Estás en la lista de espera" : mine ? "¡Te has apuntado! 🎉" : `¡${p.name.split(" ")[0]} está apuntado! 🎉`}>
                   {(e.overnight || e.price_cents > 0) && (
                     <p className="mt-2 text-sm text-indigo/70">
                       {e.overnight ? "Con pernocta" : "De pago"}: si eres menor de edad lo autorizará un padre o tutor verificado.
@@ -86,7 +87,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ev
                 </ActionForm>
               )}
               {r?.status === "pendiente_padres" && !mine && (
-                <ActionForm action={authorizeAction} hidden={{ reg: r.id, event: e.id }} submit="Autorizar su asistencia">
+                <ActionForm action={authorizeAction} hidden={{ reg: r.id, event: e.id }} submit="Autorizar su asistencia" celebrate="Asistencia autorizada ✓">
                   <label className="label mt-3" htmlFor={`a-${r.id}`}>Alergias o salud</label>
                   <textarea id={`a-${r.id}`} name="health" rows={2} className="input" />
                 </ActionForm>
