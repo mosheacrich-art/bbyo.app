@@ -10,11 +10,20 @@ function hash(s: string) { let h = 0; for (const c of s) h = (h * 31 + c.charCod
 
 /** Cartel generado del evento (sustituye a la imagen hasta que los boards suban sus propios carteles). */
 export function Poster({ e, accent, chapterName, badge, className = "" }: { e: EventRow; accent?: string | null; chapterName?: string; badge?: string; className?: string }) {
+  if (e.flyer_url) {
+    return (
+      <div className={`relative aspect-[3/4] overflow-hidden rounded-2xl bg-mist ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={e.flyer_url} alt={`Cartel: ${e.title}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        {badge && <span className="absolute right-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-indigo shadow">{badge}</span>}
+      </div>
+    );
+  }
   const h = hash(e.id);
   const bg = PALETTE[h % PALETTE.length];
   const v = h % 3;
   return (
-    <div className={`relative aspect-[4/5] overflow-hidden rounded-2xl text-white ${className}`} style={{ background: bg }}>
+    <div className={`relative aspect-[3/4] overflow-hidden rounded-2xl text-white ${className}`} style={{ background: bg }}>
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden>
         {v === 0 && <><circle cx="360" cy="70" r="150" fill="#fff" opacity=".12" /><circle cx="40" cy="470" r="110" fill="#000" opacity=".12" /></>}
         {v === 1 && <><rect x="200" y="-40" width="260" height="260" rx="60" transform="rotate(20 330 90)" fill="#fff" opacity=".12" /><circle cx="70" cy="430" r="90" fill="#f8f90a" opacity=".22" /></>}

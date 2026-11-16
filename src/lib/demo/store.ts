@@ -19,7 +19,7 @@ const dayAt = (days: number, hours: number) => {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() + days);
-  d.setHours(hours);
+  d.setHours(Math.floor(hours), Math.round((hours % 1) * 60));
   return d.toISOString();
 };
 const dateOnly = (yearsAgo: number, extraMonths = 0) => {
@@ -81,18 +81,26 @@ function build(): { db: DB; personas: Persona[] } {
 
   type Ev = [layer: string, ch: string | null, title: string, days: number, hh: number, loc: string, price: number, cap: number | null,
     open: boolean, alumni: boolean, boards: boolean, night: boolean, st: string, descr: string];
+  // Flyers reales de los chapters (las fechas de los flyers no coinciden con las de la demo)
+  const FLYERS: Record<string, string> = {
+    "Chapter meeting": "bcn-chapter-meeting", "Castanyada: cocinamos panellets": "bcn-castanyada", "Only Members": "bcn-only-members",
+    "Kickoff: Laser Tag": "bcn-kickoff", "Paint and relax: girls afternoon": "melilla-paint-and-relax", "Fiesta Ibicenca": "melilla-fiesta-ibicenca",
+    "J-Serve: cuidamos el planeta": "melilla-j-serve", "Casino Night": "melilla-casino-night",
+  };
   const evs: Ev[] = [
     ["global", null, "Sesión informativa: programas de verano", 9, 19, "Online", 0, 300, true, true, false, false, "publicado", "Resumen de los programas de verano para teens, con preguntas y respuestas en directo."],
     ["global", null, "Giving Tuesday: campaña de donaciones", 16, 9, "Online", 0, null, true, true, false, false, "publicado", "Campaña global para apoyar a los teens de BBYO."],
     ["regional", null, "Convención regional España", 26, 10, "Madrid", 9500, 120, false, true, false, true, "publicado", "Tres días con teens de todos los chapters: programa, shabat juntos y talleres de liderazgo. Incluye alojamiento y comidas."],
     ["regional", null, "Encuentro de boards", 14, 19, "Online", 0, 40, false, false, true, false, "publicado", "Reunión de coordinación entre los boards de los chapters."],
     ["regional", null, "Shabatón regional", 68, 17, "Por definir", 7000, 80, false, false, false, true, "pendiente", "Fin de semana de shabat para toda la región. Pendiente de aprobación."],
-    ["local", "bcn", "Noche de juegos", 4, 20, "Local del chapter", 0, 40, true, false, false, false, "publicado", "Programa semanal. Trae a un amigo: los prospects entran gratis."],
+    ["local", "bcn", "Chapter meeting", 4, 16.5, "Colegio Hatikva", 0, 40, true, false, false, false, "publicado", "¡Estáis todos invitados! Reunión del chapter para conocer al board y lo que viene este año. Trae a un amigo: los prospects entran gratis."],
+    ["local", "bcn", "Castanyada: cocinamos panellets", 9, 11, "Sant Cugat", 0, 35, true, false, false, false, "publicado", "Cocinamos juntos panellets y castañas. ¡Nos vemos para cocinar, compartir y disfrutar! El horario exacto y el lugar se envían en el grupo de WhatsApp."],
+    ["local", "bcn", "Only Members", 15, 18.5, "Barcelona (ubicación por privado)", 0, 30, false, false, false, false, "publicado", "Evento solo para miembros. ¡Prepárate para el frío! Es obligatorio venir con calcetines, pantalón largo y guantes. Plazas limitadas."],
     ["local", "bcn", "Voluntariado: banco de alimentos", 7, 10, "Barcelona", 0, 25, true, false, false, false, "publicado", "Mañana de voluntariado con el chapter."],
     ["local", "bcn", "Cena de shabat", 12, 19, "Comunidad", 1200, 50, true, false, false, false, "publicado", "Cena de shabat para el chapter y sus invitados."],
     ["local", "bcn", "Fiesta de Jánuca", 21, 18, "Barcelona", 800, 60, true, true, false, false, "publicado", "Fiesta de Jánuca abierta a miembros, prospects y alumni."],
     ["local", "bcn", "Retiro de board", 35, 10, "Por definir", 0, 12, false, false, true, false, "borrador", "Planificación del segundo trimestre."],
-    ["local", "bcn", "Noche de juegos de octubre", -24, 20, "Local del chapter", 0, 40, true, false, false, false, "publicado", "Programa semanal."],
+    ["local", "bcn", "Kickoff: Laser Tag", -24, 16.5, "Sant Cugat (transporte necesario)", 1000, 40, true, false, false, false, "publicado", "Arrancamos el año con una partida de laser tag. Plazas limitadas."],
     ["local", "madrid", "Torneo de fútbol sala", 7, 11, "Polideportivo", 0, 48, true, false, false, false, "publicado", "Torneo por equipos del chapter de Madrid."],
     ["local", "madrid", "Cena de shabat", 12, 20, "Comunidad", 1500, 70, true, false, false, false, "publicado", "Cena de shabat del chapter de Madrid."],
     ["local", "madrid", "Fiesta de Jánuca", 23, 18, "Madrid", 1000, 60, true, true, false, false, "publicado", "Fiesta de Jánuca del chapter de Madrid."],
@@ -100,14 +108,17 @@ function build(): { db: DB; personas: Persona[] } {
     ["local", "malaga", "Taller de liderazgo", 20, 17, "Málaga", 0, 30, false, false, false, false, "publicado", "Taller para el board y los miembros."],
     ["local", "marbella", "Tarde de playa y programa", 6, 16, "Marbella", 0, 25, true, false, false, false, "publicado", "Tarde en la playa con programa del chapter."],
     ["local", "marbella", "Cena de Jánuca", 24, 20, "Marbella", 1200, 40, true, false, false, false, "publicado", "Cena de Jánuca del chapter de Marbella."],
-    ["local", "melilla", "Reunión de chapter", 3, 19, "Melilla", 0, 25, false, false, false, false, "publicado", "Reunión mensual del chapter."],
-    ["local", "melilla", "Noche de cine", 19, 20, "Melilla", 0, 25, true, false, false, false, "publicado", "Película y debate."],
+    ["local", "melilla", "Paint and relax: girls afternoon", 5, 18, "Melilla", 0, 20, true, false, false, false, "publicado", "Tarde de B'nai B'rith Girls: pintaremos, decoraremos, charlaremos y aprenderemos todas juntas. Let's have a great time!"],
+    ["local", "melilla", "Fiesta Ibicenca", 10, 22, "Melilla", 1000, 60, true, true, false, false, "publicado", "Fiesta ibicenca del chapter. Ven de blanco."],
+    ["local", "melilla", "J-Serve: cuidamos el planeta", 13, 17, "Melilla", 0, 30, true, false, false, false, "publicado", "Jornada de voluntariado medioambiental: recogida y reciclaje. Cuidamos el planeta juntos."],
+    ["local", "melilla", "Casino Night", 19, 21, "Melilla", 500, 50, true, false, false, false, "publicado", "Póker, blackjack, ruleta y premios. Fichas de juego, sin dinero real."],
   ];
   const events = evs.map(([layer, chs, title, days, hh, location, price_cents, capacity, is_open, alumni_ok, boards_only, overnight, status, description]) => ({
     id: next(), layer, region_id: layer === "regional" ? region.id : null, chapter_id: layer === "local" ? cid(chs!) : null,
     title, description, starts_at: dayAt(days, hh), ends_at: overnight ? dayAt(days + 2, 14) : dayAt(days, hh + 2),
     location, price_cents, capacity, is_open, alumni_ok, boards_only, overnight, status,
     created_by: null, approved_by: null, approved_at: null, created_at: dayAt(Math.min(days, 0) - 10, 12),
+    flyer_url: FLYERS[title] ? `/demo/flyers/${FLYERS[title]}.jpg` : null,
   }));
   const ev = (chapter: string | null, title: string) =>
     events.find((e) => e.title === title && (chapter ? e.chapter_id === cid(chapter) : e.chapter_id === null))!.id;
@@ -173,25 +184,25 @@ function build(): { db: DB; personas: Persona[] } {
     authorized_by: null, authorized_at: null, checked_in_at: checked ? dayAt(-24, 20) : null, created_at: dayAt(-6, 18),
   });
   const registrations = [
-    reg(ev("bcn", "Noche de juegos"), "dani", "confirmada"),
-    reg(ev("bcn", "Noche de juegos"), "maya", "confirmada"),
-    reg(ev("bcn", "Noche de juegos"), "tali", "confirmada"),
-    reg(ev("bcn", "Noche de juegos"), "eli", "confirmada"),
-    reg(ev("bcn", "Noche de juegos"), "board", "confirmada"),
+    reg(ev("bcn", "Chapter meeting"), "dani", "confirmada"),
+    reg(ev("bcn", "Chapter meeting"), "maya", "confirmada"),
+    reg(ev("bcn", "Chapter meeting"), "tali", "confirmada"),
+    reg(ev("bcn", "Chapter meeting"), "eli", "confirmada"),
+    reg(ev("bcn", "Chapter meeting"), "board", "confirmada"),
     reg(ev(null, "Convención regional España"), "dani", "pendiente_padres"),
     reg(ev(null, "Convención regional España"), "jonas", "confirmada"),
     reg(ev("bcn", "Cena de shabat"), "dani", "pendiente_pago", "sara"),
     reg(ev("bcn", "Cena de shabat"), "maya", "confirmada"),
     reg(ev("bcn", "Cena de shabat"), "adam", "confirmada"),
     reg(ev("bcn", "Voluntariado: banco de alimentos"), "jonas", "confirmada"),
-    reg(ev("bcn", "Noche de juegos de octubre"), "dani", "confirmada", "dani", true),
-    reg(ev("bcn", "Noche de juegos de octubre"), "maya", "confirmada", "maya", true),
-    reg(ev("bcn", "Noche de juegos de octubre"), "gabi", "confirmada", "gabi", true),
+    reg(ev("bcn", "Kickoff: Laser Tag"), "dani", "confirmada", "dani", true),
+    reg(ev("bcn", "Kickoff: Laser Tag"), "maya", "confirmada", "maya", true),
+    reg(ev("bcn", "Kickoff: Laser Tag"), "gabi", "confirmada", "gabi", true),
     reg(ev("madrid", "Torneo de fútbol sala"), "leo", "confirmada"),
   ];
   const regId = (person: string, title: string) => registrations.find((r) => r.person_id === ids[person] && events.find((e) => e.id === r.event_id)!.title === title)!.id;
   const registration_health = [
-    { registration_id: regId("maya", "Noche de juegos"), notes: "Alergia a los frutos secos", updated_at: dayAt(-6, 18) },
+    { registration_id: regId("maya", "Chapter meeting"), notes: "Alergia a los frutos secos", updated_at: dayAt(-6, 18) },
     { registration_id: regId("maya", "Cena de shabat"), notes: "Alergia a los frutos secos", updated_at: dayAt(-6, 18) },
   ];
 
@@ -214,7 +225,7 @@ function build(): { db: DB; personas: Persona[] } {
   ];
 
   const albums = [
-    { id: next(), chapter_id: cid("bcn"), event_id: ev("bcn", "Noche de juegos de octubre"), title: "Noche de juegos de octubre", created_at: dayAt(-23, 12) },
+    { id: next(), chapter_id: cid("bcn"), event_id: ev("bcn", "Kickoff: Laser Tag"), title: "Kickoff: Laser Tag", created_at: dayAt(-23, 12) },
     { id: next(), chapter_id: cid("bcn"), event_id: null, title: "Kick-off del curso", created_at: dayAt(-60, 12) },
     { id: next(), chapter_id: cid("madrid"), event_id: null, title: "Shabat en Madrid", created_at: dayAt(-30, 12) },
   ];

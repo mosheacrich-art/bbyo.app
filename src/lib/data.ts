@@ -8,6 +8,8 @@ export type EventRow = {
   title: string; description: string; starts_at: string; ends_at: string | null; location: string;
   price_cents: number; capacity: number | null; is_open: boolean; alumni_ok: boolean; boards_only: boolean;
   overnight: boolean; status: "borrador" | "pendiente" | "publicado" | "cancelado";
+  /** Cartel subido por el board; si falta se genera uno. */
+  flyer_url?: string | null;
 };
 export type RegStatus = "pendiente_padres" | "pendiente_pago" | "confirmada" | "lista_espera" | "cancelada";
 export type RegRow = { id: string; event_id: string; person_id: string; registered_by: string; status: RegStatus; checked_in_at: string | null };
