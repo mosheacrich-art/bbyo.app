@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireSession } from "@/lib/auth/session";
 import { getChapters } from "@/lib/data";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata = { title: "Fotos" };
 
@@ -23,10 +24,7 @@ export default async function Photos() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="h-display text-6xl">Fotos</h1>
-        <p className="mt-2 text-indigo/70">Solo aparecen fotos publicadas por tu board y de personas con consentimiento.</p>
-      </div>
+      <PageHeader eyebrow="Galería" title="Fotos" subtitle="Solo aparecen fotos publicadas por tu board y de personas con consentimiento." />
       {withUrls.map((a) => (
         <section key={a.id}>
           <h2 className="text-xl font-extrabold text-indigo">{a.title} <span className="tag ml-2">{byId.get(a.chapter_id)}</span></h2>

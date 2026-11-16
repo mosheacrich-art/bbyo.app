@@ -32,7 +32,7 @@ export default async function EventAttendees({ params }: PageProps<"/manage/[cha
     <div className="space-y-4">
       <div>
         <h2 className="h-display text-5xl">{e.title}</h2>
-        <p className="capitalize text-indigo/70">{dateLong(e.starts_at)} · {timeOf(e.starts_at)} · {eur(e.price_cents)} · {e.status}</p>
+        <p className="first-letter:uppercase text-indigo/70">{dateLong(e.starts_at)} · {timeOf(e.starts_at)} · {eur(e.price_cents)} · {e.status}</p>
         <p className="mt-2 text-sm font-semibold text-indigo">
           {counts("confirmada")} confirmadas · {counts("pendiente_padres")} esperando padres · {counts("pendiente_pago")} sin pagar · {counts("lista_espera")} en espera · {rows.filter((r) => r.checked_in_at).length} han llegado
         </p>

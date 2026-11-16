@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata = { title: "Enlaces importantes" };
 
@@ -9,7 +10,7 @@ export default async function Links() {
   const { data } = await supabase.from("links").select("id, title, url, note").order("sort");
   return (
     <div className="space-y-8">
-      <h1 className="h-display text-6xl">Enlaces importantes</h1>
+      <PageHeader eyebrow="BBYO" title="Enlaces" subtitle="Webs y portales importantes de BBYO." />
       <ul className="grid gap-3 md:grid-cols-2">
         {(data ?? []).map((l) => (
           <li key={l.id} className="card">

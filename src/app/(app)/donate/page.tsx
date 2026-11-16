@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/auth/session";
 import { eur } from "@/lib/format";
 import { ActionForm } from "@/components/forms";
 import { donateAction } from "./actions";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata = { title: "Donar" };
 
@@ -18,7 +19,7 @@ export default async function Donate({ searchParams }: { searchParams: Promise<{
   const raised = new Map<string, number>(((paid ?? []) as { campaign_id: string; total_cents: number | string }[]).map((r) => [r.campaign_id, Number(r.total_cents)]));
   return (
     <div className="space-y-8">
-      <h1 className="h-display text-6xl">Donar</h1>
+      <PageHeader eyebrow="Tzedaká" title="Donar" subtitle="Ayuda a que ningún teen se quede fuera de un programa por motivos económicos." />
       {pago === "ok" && <p className="rounded-xl bg-pistachio/15 p-3 font-semibold">¡Gracias por tu donación!</p>}
       <div className="grid gap-4 md:grid-cols-2">
         {(campaigns ?? []).map((c) => {

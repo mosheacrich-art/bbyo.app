@@ -11,12 +11,15 @@
   --color-sunrise: #f8f90a;
   --color-pistachio: #6bbd00;
   --color-mist: #d9e1ff;
+  --color-paper: #f7f7f4;
+  --color-night: #10066e;
+  --color-night-2: #1a0f8a;
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --font-sans: "Hanken Grotesk Variable", system-ui, sans-serif;
 }
 
 :root { color-scheme: light; }
-body { background: #fff; color: #14096b; font-family: var(--font-sans); }
+body { background: var(--color-paper); color: #14096b; font-family: var(--font-sans); }
 
 @layer components {
   .btn { @apply inline-flex items-center justify-center rounded-full bg-indigo px-6 py-3 text-sm font-bold text-white transition hover:bg-indigo/90 disabled:opacity-60; }
@@ -27,4 +30,10 @@ body { background: #fff; color: #14096b; font-family: var(--font-sans); }
   .input { @apply w-full rounded-xl border-2 border-indigo/15 bg-white px-4 py-2.5 outline-none focus:border-indigo; }
   .label { @apply mb-1 block text-xs font-bold uppercase tracking-wide text-indigo/70; }
   .h-display { @apply font-display font-extrabold uppercase leading-[0.9] text-indigo; }
+  .eyebrow { @apply flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-lox before:h-0.5 before:w-5 before:bg-lox before:content-['']; }
+  .section-title { @apply flex items-center gap-2 text-lg font-extrabold text-indigo; }
+  .chip { @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo/15 bg-white px-4 py-1.5 text-sm font-semibold text-indigo transition hover:border-indigo/40; }
+  .chip-on { @apply border-indigo bg-indigo text-white hover:border-indigo; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 }

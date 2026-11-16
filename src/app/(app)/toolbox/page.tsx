@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth/session";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata = { title: "Toolbox" };
 
@@ -11,10 +12,7 @@ export default async function Toolbox() {
   (data ?? []).forEach((r) => groups.set(r.category, [...(groups.get(r.category) ?? []), r]));
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="h-display text-6xl">Toolbox</h1>
-        <p className="mt-2 text-indigo/70">Plantillas, guías y documentos para organizar tu chapter.</p>
-      </div>
+      <PageHeader eyebrow="Recursos" title="Toolbox" subtitle="Plantillas, guías y documentos para organizar tu chapter." />
       {[...groups].map(([cat, list]) => (
         <section key={cat}>
           <h2 className="font-display mb-3 text-2xl font-extrabold uppercase text-indigo/70">{cat}</h2>

@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/auth/session";
 import { ActionForm } from "@/components/forms";
 import { createClient } from "@/lib/supabase/server";
 import { friendly } from "@/lib/errors";
+import { PageHeader } from "@/components/page-header";
 
 async function redeem(_: unknown, form: FormData) {
   "use server";
@@ -20,8 +21,7 @@ export default async function Join({ searchParams }: { searchParams: Promise<{ c
   await requireSession();
   return (
     <div className="mx-auto max-w-md space-y-4">
-      <h1 className="h-display text-6xl">Únete a tu chapter</h1>
-      <p className="text-indigo/70">Tu chapter board te habrá dado un código de invitación.</p>
+      <PageHeader eyebrow="Invitación" title="Únete a tu chapter" subtitle="Tu chapter board te habrá dado un código de invitación." />
       <ActionForm action={redeem} submit="Unirme">
         <label className="label" htmlFor="code">Código</label>
         <input id="code" name="code" defaultValue={codigo} className="input uppercase" autoComplete="off" />

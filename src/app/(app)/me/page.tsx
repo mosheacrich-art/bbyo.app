@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireSession, ROLE_LABEL } from "@/lib/auth/session";
 import { getChapters } from "@/lib/data";
 import { ActionForm } from "@/components/forms";
+import { PageHeader } from "@/components/page-header";
 
 async function saveProfile(_: unknown, form: FormData) {
   "use server";
@@ -34,8 +35,7 @@ export default async function Me() {
   const { data: consent } = await supabase.from("photo_consents").select("allowed").eq("person_id", s.id).maybeSingle();
   return (
     <div className="mx-auto max-w-xl space-y-8">
-      <h1 className="h-display text-6xl">Mi perfil</h1>
-      <p className="text-indigo/70">{s.email}</p>
+      <PageHeader eyebrow="Mi cuenta" title="Mi perfil" subtitle={s.email ?? undefined} />
       <ActionForm action={saveProfile} submit="Guardar" className="card space-y-3">
         <div><label className="label" htmlFor="full_name">Nombre</label><input id="full_name" name="full_name" defaultValue={s.profile.full_name} className="input" required /></div>
         <div><label className="label" htmlFor="birth_date">Fecha de nacimiento</label><input id="birth_date" name="birth_date" type="date" defaultValue={s.profile.birth_date ?? ""} className="input" /></div>

@@ -5,6 +5,8 @@ import { requireSession } from "@/lib/auth/session";
 import { getChapters, STATUS_LABEL, LAYER_LABEL, type EventRow, type RegRow } from "@/lib/data";
 import { dateLong, timeOf, eur } from "@/lib/format";
 import { ActionForm } from "@/components/forms";
+import { Poster } from "@/components/event-poster";
+import { ArrowLeft, CalendarDays, Clock, MapPin, Ticket, Users } from "lucide-react";
 import { registerAction, authorizeAction, cancelAction, payAction } from "../actions";
 
 export default async function EventPage({ params, searchParams }: PageProps<"/events/[id]">) {
@@ -33,26 +35,35 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ev
   const full = e.capacity != null && (seats as number | null) != null && (seats as number) >= e.capacity;
 
   return (
-    <article className="mx-auto max-w-3xl space-y-8">
-      <Link href="/calendar" className="text-sm font-bold text-indigo underline">← Calendario</Link>
-      <header>
-        <div className="flex flex-wrap gap-1.5">
-          <span className="tag">{e.layer === "local" ? chapter?.name : LAYER_LABEL[e.layer]}</span>
-          {e.overnight && <span className="tag">Con pernocta</span>}
-          {e.boards_only && <span className="tag">Solo boards</span>}
-          {e.status !== "publicado" && <span className="tag bg-sunrise">{e.status}</span>}
-        </div>
-        <h1 className="h-display mt-2 text-6xl">{e.title}</h1>
-        <p className="mt-3 text-lg font-semibold text-indigo/80 capitalize">{dateLong(e.starts_at)} · {timeOf(e.starts_at)}{e.ends_at ? `–${timeOf(e.ends_at)}` : ""}</p>
-        <p className="text-indigo/70">{e.location || "Lugar por confirmar"} · {eur(e.price_cents)}{e.capacity ? ` · ${seats ?? 0}/${e.capacity} plazas` : ""}</p>
-      </header>
+    <article className="mx-auto max-w-5xl space-y-8">
+      <Link href="/calendar" className="inline-flex items-center gap-1 text-sm font-bold text-indigo hover:underline"><ArrowLeft size={15} aria-hidden />Eventos</Link>
+      <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:items-start">
+        <Poster e={e} accent={chapter?.accent} chapterName={chapter?.name} className="shadow-lg md:sticky md:top-8" />
+        <div className="space-y-6">
+          <header>
+            <p className="eyebrow">{e.layer === "local" ? `Chapter ${chapter?.name ?? ""}` : LAYER_LABEL[e.layer]}</p>
+            <h1 className="h-display mt-2 text-5xl md:text-6xl">{e.title}</h1>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {e.overnight && <span className="tag">Con pernocta</span>}
+              {e.boards_only && <span className="tag">Solo boards</span>}
+              {e.is_open && <span className="tag">Abierto a prospects</span>}
+              {e.alumni_ok && <span className="tag">Alumni bienvenidos</span>}
+              {e.status !== "publicado" && <span className="tag bg-sunrise">{e.status}</span>}
+            </div>
+          </header>
+          <dl className="card grid grid-cols-2 gap-4 text-sm">
+            <div><dt className="flex items-center gap-1 text-xs font-semibold text-indigo/55"><CalendarDays size={13} aria-hidden />Fecha</dt><dd className="font-bold first-letter:uppercase text-indigo">{dateLong(e.starts_at)}</dd></div>
+            <div><dt className="flex items-center gap-1 text-xs font-semibold text-indigo/55"><Clock size={13} aria-hidden />Hora</dt><dd className="font-bold text-indigo">{timeOf(e.starts_at)}{e.ends_at ? `–${timeOf(e.ends_at)}` : ""}</dd></div>
+            <div><dt className="flex items-center gap-1 text-xs font-semibold text-indigo/55"><MapPin size={13} aria-hidden />Lugar</dt><dd className="font-bold text-indigo">{e.location || "Por confirmar"}</dd></div>
+            <div><dt className="flex items-center gap-1 text-xs font-semibold text-indigo/55"><Users size={13} aria-hidden />Precio y plazas</dt><dd className="font-bold text-indigo">{eur(e.price_cents)}{e.capacity ? ` · ${seats ?? 0}/${e.capacity}` : ""}</dd></div>
+          </dl>
 
       {sp.pago === "ok" && <p className="rounded-xl bg-pistachio/15 p-3 font-semibold text-indigo">Pago recibido. Inscripción confirmada.</p>}
       {sp.pago === "cancelado" && <p className="rounded-xl bg-jaffa/10 p-3 font-semibold text-indigo">Pago cancelado. Puedes intentarlo de nuevo cuando quieras.</p>}
       {e.description && <p className="whitespace-pre-line text-lg text-indigo/90">{e.description}</p>}
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-extrabold text-indigo">Inscripción</h2>
+        <h2 className="section-title"><Ticket size={18} className="text-lox" aria-hidden />Inscripción</h2>
         {!open && <p className="text-indigo/70">Las inscripciones no están abiertas para este evento.</p>}
         {people.map((p) => {
           const r = regOf(p.id);
@@ -97,6 +108,8 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ev
           );
         })}
       </section>
+        </div>
+      </div>
     </article>
   );
 }

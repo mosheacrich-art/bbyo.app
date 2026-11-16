@@ -1,45 +1,64 @@
-import Link from "next/link";
 import { requireSession, permissions, ROLE_LABEL } from "@/lib/auth/session";
 import { getChapters } from "@/lib/data";
+import { getAlerts } from "@/lib/alerts";
 import { signOut } from "@/app/login/actions";
-import { Nav } from "@/components/nav";
+import { AppShell, type NavGroup, type NavItem } from "@/components/shell";
+import { DEMO } from "@/lib/demo/mode";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const session = await requireSession();
   const chapters = await getChapters();
   const perm = permissions(session, chapters);
-  const items = [
-    { href: "/", label: "Inicio" },
-    { href: "/calendar", label: "Calendario" },
-    { href: "/photos", label: "Fotos" },
-    { href: "/toolbox", label: "Toolbox" },
-    { href: "/links", label: "Enlaces" },
-    { href: "/donate", label: "Donar" },
-    ...(perm.canManage ? [{ href: "/manage", label: "Gestión" }] : []),
-    ...(perm.isStaff ? [{ href: "/admin", label: "Admin" }] : []),
+  const alerts = await getAlerts(session.id);
+  const noRole = session.assignments.length === 0;
+
+  const groups: NavGroup[] = [
+    { items: [{ href: "/", label: "Inicio", icon: "home", badge: alerts.length }] },
+    {
+      title: "Principal",
+      items: [
+        { href: "/calendar", label: "Calendario", icon: "calendar" },
+        { href: "/photos", label: "Fotos", icon: "photos" },
+        { href: "/toolbox", label: "Toolbox", icon: "toolbox" },
+        { href: "/links", label: "Enlaces", icon: "links" },
+        { href: "/donate", label: "Donar", icon: "donate" },
+      ],
+    },
+    ...(perm.canManage || perm.isStaff
+      ? [{
+          title: "Gestión",
+          items: [
+            ...(perm.canManage ? [{ href: "/manage", label: perm.managedChapters.length === 1 ? `Chapter ${perm.managedChapters[0].name}` : "Chapters", icon: "manage" } as NavItem] : []),
+            ...(perm.isStaff ? [{ href: "/admin", label: "Administración", icon: "admin" } as NavItem] : []),
+          ],
+        }]
+      : []),
+    {
+      title: "Mi cuenta",
+      items: [
+        { href: "/me", label: "Mi perfil", icon: "profile" },
+        ...(noRole ? [{ href: "/unirse", label: "Tengo un código", icon: "join" } as NavItem] : []),
+      ],
+    },
   ];
-  const mainRole = session.assignments[0]?.role;
+  const tabs: NavItem[] = [
+    { href: "/", label: "Inicio", icon: "home" },
+    { href: "/calendar", label: "Eventos", icon: "calendar" },
+    { href: "/photos", label: "Fotos", icon: "photos" },
+    perm.canManage ? { href: "/manage", label: "Gestión", icon: "manage" } : { href: "/donate", label: "Donar", icon: "donate" },
+  ];
+
+  const a = session.assignments[0];
+  const scope = a?.scope_type === "chapter" ? chapters.find((c) => c.id === a.scope_id)?.name : a?.scope_type === "region" ? "España" : null;
+  const name = session.profile.full_name || session.email || "";
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "?";
+
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-20 border-b border-indigo/10 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-          <Link href="/" className="font-display text-2xl font-extrabold uppercase tracking-tight text-indigo">
-            BBYO <span className="text-lox">España</span>
-          </Link>
-          <Nav items={items} />
-          <div className="ml-auto flex items-center gap-3">
-            <Link href="/me" className="text-right text-sm leading-tight">
-              <span className="block font-bold text-indigo">{session.profile.full_name || session.email}</span>
-              <span className="block text-xs text-indigo/60">{mainRole ? ROLE_LABEL[mainRole] : "Sin rol aún"}</span>
-            </Link>
-            <form action={signOut}><button className="btn-ghost btn-sm">Salir</button></form>
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-      <footer className="mx-auto max-w-6xl px-4 pb-10 text-xs text-indigo/50">
-        Propuesta no oficial para BBYO España. Marca y logotipo pendientes de autorización de BBYO.
-      </footer>
-    </div>
+    <AppShell
+      groups={groups} tabs={tabs} alerts={alerts.length} signOut={signOut} demo={DEMO}
+      user={{ name, initials, role: a ? `${a.board_position ?? ROLE_LABEL[a.role]}${scope ? ` · ${scope}` : ""}` : "Sin chapter" }}
+    >
+      {children}
+    </AppShell>
   );
 }

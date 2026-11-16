@@ -6,6 +6,7 @@ import { requireSession, permissions, ROLE_LABEL, type Role } from "@/lib/auth/s
 import { getChapters } from "@/lib/data";
 import { ActionForm } from "@/components/forms";
 import { dateShort, timeOf } from "@/lib/format";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata = { title: "Administración" };
 
@@ -44,7 +45,7 @@ export default async function Admin() {
 
   return (
     <div className="space-y-8">
-      <h1 className="h-display text-6xl">Administración</h1>
+      <PageHeader eyebrow="Staff" title="Administración" subtitle="Roles de toda la región y registro de cambios." />
       <div className="grid gap-6 md:grid-cols-2">
         <section>
           <h2 className="mb-2 text-xl font-extrabold text-indigo">Staff y boards</h2>
